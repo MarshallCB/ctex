@@ -20,7 +20,7 @@
 - Composable
 
 ## Nutshell
-Write class-like definitions to capture state.
+Write class-like definitions for intuitive, observable, and composable state
 
 ## Usage
 ```js
