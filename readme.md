@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/marshallcb/ctex/raw/master/ctex.png" alt="ctex" width="100" />
+  <img src="https://github.com/marshallcb/ctex/raw/main/ctex.png" alt="ctex" width="100" />
 </div>
 
 <h1 align="center">ctex</h1>
@@ -8,7 +8,7 @@
     <img src="https://badgen.now.sh/npm/v/ctex" alt="version" />
   </a>
   <a href="https://bundlephobia.com/result?p=ctex">
-    <img src="https://img.badgesize.io/MarshallCB/ctex/master/min.js?compression=brotli" alt="install size" />
+    <img src="https://img.badgesize.io/MarshallCB/ctex/main/min.js?compression=brotli" alt="install size" />
   </a>
 </div>
 
