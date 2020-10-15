@@ -111,7 +111,7 @@ function Context(d){
   };
   ContextNode.prototype.set = function(obj){
     for(let [k,v] of Object.entries(obj))
-      this[k]=v;
+      this[k].isContext ? this[k].set(v) : this[k]=v;
   };
   ContextNode.prototype.values = function(){
     let ans = {};
