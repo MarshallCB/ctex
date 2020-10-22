@@ -3,7 +3,7 @@ import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 
 export default {
-	input: 'src/index.js',
+	input: 'src/Context.js',
 	output: [{
 		format: 'esm',
 		file: pkg.module,

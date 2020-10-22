@@ -1,127 +1,106 @@
 'use strict';
 
-function parseObject(def){
-  let mpn = [[],[],[]];
-  do{
-    Object.getOwnPropertyNames(def)
-    .concat(Object.getOwnPropertySymbols(def).map(s => s.toString()))
-    .forEach(p => {
-      let x = def[p];
-      mpn[typeof x === 'function' && !mpn[0].includes(0) ? 0 : x.isContext && !mpn[2].includes(p) ? 2 : 1].push(p);
-    });
-  } while(
-    (def = Object.getPrototypeOf(def)) &&   //walk-up the prototype chain
-    Object.getPrototypeOf(def)              //not the the Object prototype methods (hasOwnProperty, etc...)
-  )
+Object.defineProperty(exports, '__esModule', { value: true });
 
+function parseObject(d){
+  let mpn = [[],[],[]];
+  Object.getOwnPropertyNames(d)
+  .forEach(p => {
+    if(p !== 'init')
+      mpn[typeof d[p] === 'function' ? 0 : (d[p] && d[p]._isCtex) ? 2 : 1].push(p);
+  });
   return mpn
 }
 
-// class ContextNode{
-//   constructor(d, i){
-//     let { init, ...definition } = d
-//     this.init = init || (()=>{})
-//     this.observers = {}
-//     this.isContext = true
-//     let [ methods, properties, nodes ] = parseObject(definition)
-//     // Set entrypoints
-//     methods.forEach(k => {
-//       Object.defineProperty(this, k, {
-//         set(x){ definition[k](x) },
-//         get(){ return definition[k] },
-//         enumerable: false
-//       })
-//     })
-//     // Set endpoints
-//     properties.forEach(k => {
-//       this.observers[k] = []
-//       Object.defineProperty(this, k, {
-//         set(x){
-//           this[`_$${k}`] = x;
-//           this.observers[k].forEach(f => f(x))
-//         },
-//         get(){
-//           return this[`_$${k}`]
-//         },
-//         enumerable: true
-//       })
-//       this[k] = definition[k]
-//     })
-//     // set inner nodes
-//     nodes.forEach(k => {
-//       this[k] = definition[k]
-//     })
-//   }
-//   observe(k, fn){
-//     this.observers[k].push(fn)
-//   }
-// }
-
-
-
-// function Context(definition){
-
-//   return (initial) => {
-
-//     if (this instanceof Context === false) { return new Context(schema) }
-//     let c = new ContextNode(definition, initial)
-//     c.init()
-//     return c;
-//   }
-// }
-
-function Context(d){
-  let { init, ...definition } = d;
-  let [ methods, properties, nodes ] = parseObject(definition);
-  function ContextNode(initial){
-    if (this instanceof ContextNode === false) { return new ContextNode(initial) }
-    this.init = init || (()=>{});
-    this.observers = {};
-    this.isContext = true;
-    // Set entrypoints
-    methods.forEach(k => {
-      Object.defineProperty(this, k, {
-        set(x){ definition[k](x); },
+class Ctex{
+  constructor(impn,definition,initial){
+    // this.init = impn[0].bind(this)
+    let def = function(key,value,custom=false){
+      Object.defineProperty(this,key,custom?value:{value});
+    }.bind(this);
+    // init() function
+    def('init',impn[0].bind(this));
+    // root subscription key
+    def('r',Symbol());
+    // marker
+    def('_isCtex',true);
+    // subscribers
+    def('s',{});
+    // succinct way to define generator function to iterate over properties and nodes
+    def(Symbol.iterator,{*a(){yield* impn[2];yield* impn[3];}}.a);
+    
+    let values = this.values.bind(this);
+    // Set methods
+    impn[1].forEach(k => {
+      def(k,{
+        set(x){ Promise.resolve(definition[k](x)); },
         get(){ return definition[k] },
-        enumerable: false
-      });
+        enumerable: true
+      },true);
     });
-    // Set endpoints
-    properties.forEach(k => {
-      this.observers[k] = [];
-      Object.defineProperty(this, k, {
+    // Set properties
+    impn[2].forEach(k => {
+      let { get, set } = Object.getOwnPropertyDescriptor(definition,k);
+      def('_$'+k,{writable:true},true);
+      def(k,get ? {get} : {
         set(x){
-          this[`_$${k}`] = x;
-          this.observers[k].forEach(f => f(x));
+          this[`_$${k}`] = set ? set(x) : x;
+          if(this.s[k]){
+            this.s[k].forEach(f => Promise.resolve(f(x)));
+          }
+          if(this.s[this.r]){
+            this.s[this.r].forEach(f => Promise.resolve(f(values())));
+          }
+          // TODO: include flag for whether root subscription should trigger save (no if from internal node)
+          // TODO: include values() flag for JSON-friendly, storage-friendly, or what
         },
         get(){
           return this[`_$${k}`]
         },
         enumerable: true
-      });
-      this[k] = initial[k] || definition[k];
+      },true);
+      if(!get)
+        this[k] = initial[k] || definition[k];
     });
     // set inner nodes
-    nodes.forEach(k => {
+    impn[3].forEach(k => {
       this[k] = definition[k];
-      this[k].set(initial[k] || {});
+      this[k] instanceof Ctex ? this[k].set(initial[k] || {}) : this[k]=this[k](initial[k] || {});
     });
+    Object.seal(this);
     this.init();
   }
-  ContextNode.prototype.observe = function(k,fn){
-    this.observers[k].push(fn);
-  };
-  ContextNode.prototype.set = function(obj){
+  subscribe(k,fn){
+    let id = Symbol();
+    if(typeof k === 'function'){
+      fn = k;
+      k = this.r;
+    }
+    if(!this.s[k]){
+      this.s[k] = new Map();
+    }
+    this.s[k].set(id, fn);
+    return ()=>this.s[k].delete(id);
+  }
+  set(obj){
     for(let [k,v] of Object.entries(obj))
-      this[k].isContext ? this[k].set(v) : this[k]=v;
-  };
-  ContextNode.prototype.values = function(){
+      if(this[k] !== undefined)
+      (this[k] && this[k]._isCtex) ? this[k].set(v) : this[k]=v;
+  }
+  values(){
     let ans = {};
-    properties.forEach(k => ans[k]=this[k]);
-    nodes.forEach(k=>ans[k]=this[k].values());
+    for(var k of this)
+      ans[k] = (this[k] && this[k]._isCtex) ? this[k].values() : this[k];
     return ans
-  };
-  return ContextNode
+  }
 }
 
-module.exports = Context;
+function Context(definition){
+  let { init, ...rest } = definition;
+  let mpn = parseObject(rest);
+  let fn = (initial={}) => new Ctex([init || (()=>{}),...mpn],definition,initial);
+  fn._isCtex = true;
+  return fn;
+}
+
+exports.Context = Context;

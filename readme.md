@@ -20,7 +20,17 @@
 - Composable
 
 ## Nutshell
-Write class-like definitions for intuitive, observable, and composable state
+1. Write class-like definitions for intuitive, observable, and composable state
+2. Subscribe to updates in element init() 
+```js
+// Ideas
+this.example = is('example')
+this.is('example')
+this.is.subscribe(this.render)
+this.is = is('example','example2','global', { name: "" })
+```
+3. is() should auto-subscribe to save to idb / restore data from idb
+4. if logged in, is() should auto-subscribe to sync with remote
 
 ## Usage
 ```js
