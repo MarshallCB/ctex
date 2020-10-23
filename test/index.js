@@ -1,6 +1,6 @@
 import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
-import Context from '../dist';
+import {Context} from '../dist';
 
 const API = suite('exports');
 

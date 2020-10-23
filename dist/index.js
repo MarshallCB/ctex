@@ -2,6 +2,48 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+// from https://github.com/lukeed/flattie
+function iterate(val, callback=(()=>{}), sep='/', key='', out={}) {
+  var k, pfx = key ? (key + sep) : key;
+  if (val && val._isCtex){
+    callback(key,val);
+    for (k of val) {
+      iterate(val[k], callback, sep, pfx+k, out);
+    }
+  }else if (Array.isArray(val)) {
+    for (k=0; k < val.length; k++) {
+      iterate(val[k], callback, sep, pfx+k, out);
+    }
+  } else if(val && typeof val == 'object') {
+    for (k in val) {
+      iterate(val[k], callback, sep, pfx+k, out);
+    }
+  } else {
+    dset(out, key, val);
+  }
+  return out;
+}
+
+// from https://github.com/lukeed/dset/
+function dset(obj,keys,val){
+  keys=keys.split('/');
+  var i=0, l=keys.length, t=obj, x;
+  for (; i < l; ++i) {
+    x = t[keys[i]];
+    t = t[keys[i]] = (i === l - 1 ? val : (x != null ? x : (!!~keys[i+1].indexOf('.') || !(+keys[i+1] > -1)) ? {} : []));
+  }
+}
+
+// from https://github.com/developit/dlv
+function dlv(obj, key, p, undef) {
+  key = key.split('/');
+  let o = obj;
+	for (p = 0; p < key.length; p++) {
+		o = o ? o[key[p]] : undef;
+	}
+	return o;
+}
+
 function parseObject(d){
   let mpn = [[],[],[]];
   Object.getOwnPropertyNames(d)
@@ -11,6 +53,9 @@ function parseObject(d){
   });
   return mpn
 }
+
+// TODO: try replacing Map() with {}
+// TODO: generalize flattie to improve values() and set() for arrays and objects
 
 class Ctex{
   constructor(impn,definition,initial){
@@ -82,16 +127,18 @@ class Ctex{
     this.s[k].set(id, fn);
     return ()=>this.s[k].delete(id);
   }
-  set(obj){
+  set(obj={}, recurseFlag=true){
     for(let [k,v] of Object.entries(obj))
-      if(this[k] !== undefined)
-      (this[k] && this[k]._isCtex) ? this[k].set(v) : this[k]=v;
+      if(this[k] !== undefined && (this[k] == null || !this[k]._isCtex))
+        this[k]=v;
+    if(recurseFlag){
+      iterate(this,(key,ctex)=>{
+        ctex.set(dlv(obj,key),false);
+      });
+    }
   }
   values(){
-    let ans = {};
-    for(var k of this)
-      ans[k] = (this[k] && this[k]._isCtex) ? this[k].values() : this[k];
-    return ans
+    return iterate(this)
   }
 }
 
@@ -103,57 +150,18 @@ function Context(definition){
   return fn;
 }
 
-// from https://github.com/lukeed/flattie
-function iterate(val, callback, sep='/', key='') {
-	var k, pfx = key ? (key + sep) : key;
-  if(val!=null){
-    if (val._isCtex){
-      callback(key,val);
-      for (k of val) {
-        iterate(val[k], callback, sep, pfx+k);
-      }
-    }else if (Array.isArray(val)) {
-      for (k=0; k < val.length; k++) {
-        iterate(val[k], callback, sep, pfx+k);
-      }
-    } else if(typeof val == 'object') {
-      for (k in val) {
-        iterate(val[k], callback, sep, pfx+k);
-      }
-    }
-  }
-}
-
-function traverse(root,route){
-  let segments = route.split('/').filter(s=>s.length);
-  let a = root;
-  // remember last key
-  let last = segments.pop();
-  // traverse to final parent
-  for(let s of segments){
-    a = a[s];
-  }
-  // return parent node & final key
-  return [a, last];
-}
-
-
-
 function Network(def){
   let root = Context(def)();
   
   function is(r){
-    let [parent, key] = traverse(root,r);
-    return parent[key];
+    return dlv(root,r);
   }
   is.get = function(r){
-    let [parent, key] = traverse(root,r);
-    let ans = parent[key];
+    let ans = dlv(root,r);
     return (ans && ans._isCtex) ? ans.values() : ans;
   };
   is.post = function(r,data){
-    let [parent, key] = traverse(root,segments);
-    parent[key](data);
+    return dlv(root,r)(data);
   };
   is.save = function(saveFn){
     let cb = (key,ctex) => ctex.subscribe((data) => saveFn(key,data));

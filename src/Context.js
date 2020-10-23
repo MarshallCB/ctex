@@ -1,3 +1,5 @@
+import { iterate, dlv } from './utils'
+
 function parseObject(d){
   let mpn = [[],[],[]]
   Object.getOwnPropertyNames(d)
@@ -7,6 +9,9 @@ function parseObject(d){
   })
   return mpn
 }
+
+// TODO: try replacing Map() with {}
+// TODO: generalize flattie to improve values() and set() for arrays and objects
 
 class Ctex{
   constructor(impn,definition,initial){
@@ -78,16 +83,18 @@ class Ctex{
     this.s[k].set(id, fn)
     return ()=>this.s[k].delete(id);
   }
-  set(obj){
+  set(obj={}, recurseFlag=true){
     for(let [k,v] of Object.entries(obj))
-      if(this[k] !== undefined)
-      (this[k] && this[k]._isCtex) ? this[k].set(v) : this[k]=v
+      if(this[k] !== undefined && (this[k] == null || !this[k]._isCtex))
+        this[k]=v
+    if(recurseFlag){
+      iterate(this,(key,ctex)=>{
+        ctex.set(dlv(obj,key),false)
+      })
+    }
   }
   values(){
-    let ans = {}
-    for(var k of this)
-      ans[k] = (this[k] && this[k]._isCtex) ? this[k].values() : this[k]
-    return ans
+    return iterate(this)
   }
 }
 
