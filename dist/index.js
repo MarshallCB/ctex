@@ -56,6 +56,7 @@ function parseObject(d){
 
 // TODO: try replacing Map() with {}
 // TODO: generalize flattie to improve values() and set() for arrays and objects
+// TODO: include flag for whether root subscription should trigger save (no if from internal node)
 
 class Ctex{
   constructor(impn,definition,initial){
@@ -72,7 +73,11 @@ class Ctex{
     // subscribers
     def('s',{});
     // succinct way to define generator function to iterate over properties and nodes
+    // used by the iterate function in utils
     def(Symbol.iterator,{*a(){yield* impn[2];yield* impn[3];}}.a);
+    def('_methods', impn[1]);
+    def('_properties', impn[2]);
+    def('_nodes', impn[3]);
     
     let values = this.values.bind(this);
     // Set methods
@@ -96,8 +101,6 @@ class Ctex{
           if(this.s[this.r]){
             this.s[this.r].forEach(f => Promise.resolve(f(values())));
           }
-          // TODO: include flag for whether root subscription should trigger save (no if from internal node)
-          // TODO: include values() flag for JSON-friendly, storage-friendly, or what
         },
         get(){
           return this[`_$${k}`]
@@ -110,13 +113,12 @@ class Ctex{
     // set inner nodes
     impn[3].forEach(k => {
       this[k] = definition[k];
-      this[k] instanceof Ctex ? this[k].set(initial[k] || {}) : this[k]=this[k](initial[k] || {});
+      this[k] instanceof Ctex ? this[k].set(initial[k]) : this[k]=this[k](initial[k]);
     });
     Object.seal(this);
     this.init();
   }
-  subscribe(k,fn){
-    let id = Symbol();
+  subscribe(k,fn,id=Symbol()){
     if(typeof k === 'function'){
       fn = k;
       k = this.r;
@@ -128,9 +130,16 @@ class Ctex{
     return ()=>this.s[k].delete(id);
   }
   set(obj={}, recurseFlag=true){
-    for(let [k,v] of Object.entries(obj))
-      if(this[k] !== undefined && (this[k] == null || !this[k]._isCtex))
-        this[k]=v;
+    this._properties.forEach(k => {
+      if(obj[k] !== undefined){
+        this[k]=obj[k];
+      }
+    });
+    // for(let [k,v] of Object.entries(obj))
+    //   if(this[k] !== undefined && (this[k] == null || !this[k]._isCtex))
+    //     this[k]=v
+    // we want to iterate through the whole tree only for the original caller of set()
+    // otherwise, each ctext would set() and cause unnecessary set()'s
     if(recurseFlag){
       iterate(this,(key,ctex)=>{
         ctex.set(dlv(obj,key),false);

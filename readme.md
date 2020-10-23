@@ -15,9 +15,12 @@
 <div align="center">Simple observable objects</div>
 
 ## Features
-- Defined with an object literal
+- Defined with an object literal (simple!)
 - Every property is observable
-- Composable
+- Composable (Contexts can contain other Contexts)
+- Effortlessly synchronize with browser storage (IndexedDB)
+- Easily create a NodeJS API with a DB connection
+- Small (~1kB)
 
 ## Nutshell
 1. Write class-like definitions for intuitive, observable, and composable state
