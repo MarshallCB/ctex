@@ -1,4 +1,4 @@
-import { Context } from './Context'
+import { Model } from './Model'
 import { Network } from './Network'
 
-export { Context, Network }
+export { Model, Network }

@@ -1,9 +1,9 @@
-import {Context} from './Context'
+import {Model} from './Model'
 import { iterate, traverse } from './utils'
 
 
 function Network(def){
-  let root = Context(def)()
+  let root = Model(def)()
   
   function is(r){
     return traverse(root,r);

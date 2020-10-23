@@ -45,16 +45,17 @@ class Ctex{
       def(k,get ? {get} : {
         set(x){
           x = set ? set(x) : x
+          if(this[`_$${k}`] !== x)
           this[`_$${k}`] = x;
           let s = this.s
           if(s[k]){
             for(let f of s[k])
-              Promise.resolve(x)
+              Promise.resolve(f(x))
           }
           if(s['']){
             let vals = iterate(this)
             for(let f of s[''])
-              Promise.resolve(vals)
+              Promise.resolve(f(vals))
           }
         },
         get(){
@@ -90,6 +91,7 @@ class Ctex{
         fn = k
         k = ''
       }
+      fn=fn.bind(this)
       if(this[k] && this[k]._isCtex){
         // subscribe to context's root
         return this[k].subscribe(fn)
@@ -107,7 +109,7 @@ class Ctex{
   }
 }
 
-function Context(definition){
+function Model(definition){
   let { init, ...rest } = definition
   let mpn = parseObject(rest)
   let fn = (initial={}) => new Ctex([init || (()=>{}),...mpn],definition,initial)
@@ -115,4 +117,4 @@ function Context(definition){
   return fn;
 }
 
-export { Context }
+export { Model }

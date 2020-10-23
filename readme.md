@@ -12,63 +12,57 @@
   </a>
 </div>
 
-<div align="center">Simple observable objects</div>
+<div align="center">Observable objects for simple state management</div>
 
 ## Features
 - Defined with an object literal (simple!)
-- Every property is observable
+- Every property is observable (can be subscribed to)
 - Composable (Contexts can contain other Contexts)
 - Effortlessly synchronize with browser storage (IndexedDB)
-- Easily create a NodeJS API with a DB connection
 - Small (~1kB)
 
-## Nutshell
-1. Write class-like definitions for intuitive, observable, and composable state
-2. Subscribe to updates in element init() 
+## API
+
+### `Model`
+
+`Model` is used to define a set of stateful behaviors. Think of these like data components.
+When a model is invoked, it creates a (`Ctex`)[#Ctex]
+
+**Person.js**
+In this file, we define a Person with `{name, age}` defaults.
 ```js
-// Ideas
-this.example = is('example')
-this.is('example')
-this.is.subscribe(this.render)
-this.is = is('example','example2','global', { name: "" })
-```
-3. is() should auto-subscribe to save to idb / restore data from idb
-4. if logged in, is() should auto-subscribe to sync with remote
+import { Model } from 'ctex';
 
-## Usage
-```js
-// test.js
-import Context from 'ctex';
-
-let Test = Context({
-  init(){ // guaranteed to run when context has been created. not required
-    console.log("initing")
-  },
-  value: 1, //property
-  hello: "Marshall", //property
-  increment(x=1){ // method
-    this.value+=x;
-  }
+export let Person = Model({
+  name: "No name",
+  age: 0
 })
-
-// index.js
-import Test from './test.js'
-
-let t = Test({ value: 2 }); // OR let t = new Test({ value: 2})
-// "initing"
-console.log(t.value); // 2
-
-t.observe('value', (x) => {
-  console.log("observed that! ",x)
-})
-
-t.increment()
-// "observed that! 3"
-t.set({hello:"Macy",value:10})
-// "observed that! 10"
-console.log(t.values()) // return properties & nested context properties in object form
 ```
 
+**example.js**
+```js
+import { Person } from './Person.js';
+
+// Creating multiple Ctex instances based on the Person model
+
+let marshall = Person({ name: "Marshall" }) // {name: "Marshall", age: 0}
+let macy = Person({ name: "Macy", age: 21 }) // {name: "Macy", age: 21}
+let anon = Person() // {name: "No name", age: 0}
+```
+
+### `Ctex`
+
+Think of `Ctex` instances like specialized objects that can be subscribed to.
+
+```js
+
+```
+
+### `Network`
+
+`Network` is intended to be a top-level state API that contains multiple contexts and a default state. It allows for asynchronous loading/saving to an external source (such as IndexedDB). It also creates a REST-like API to access any `Ctex` within it.
+
+For example, accessing the innermost value of `{ a: { b: { c: "d" }}}` would look like `network("a/b/c")`
 ## Special Features
 
 **Call functions by setting the function name**

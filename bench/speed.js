@@ -1,4 +1,4 @@
-import { Context, Network } from '../dist';
+import { Model, Network } from '../dist';
 import { Suite } from 'benchmark';
 
 export function speed(){
@@ -7,8 +7,8 @@ export function speed(){
     console.log('  ' + e.target);
   });
 
-  bench.add('Context', () => {
-    let example = Context({
+  bench.add('Model', () => {
+    let example = Model({
       name: "Marshall",
       age: 12,
       stuff: {
@@ -29,7 +29,7 @@ export function speed(){
     }
   })
 
-  let example2 = Context({
+  let example2 = Model({
     name: "Marshall",
     age: 12,
     stuff: {
@@ -46,7 +46,7 @@ export function speed(){
     }
   }
   console.log('\Object setting:');
-  bench.add('Context Set', () => {
+  bench.add('Model Set', () => {
     example2.set({
       name: "Mark",
       age: 53,
