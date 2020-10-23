@@ -25,7 +25,8 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "test": "uvu -r esm test"
+    "test": "uvu -r esm test",
+    "bench": "node -r esm bench"
   },
   "keywords": [
     "state",
@@ -37,6 +38,8 @@
   ],
   "devDependencies": {
     "@rollup/plugin-node-resolve": "8.1.0",
+    "benchmark": "^2.1.4",
+    "brotli-size": "^4.0.0",
     "esm": "^3.2.25",
     "rollup": "2.21.0",
     "rollup-plugin-terser": "6.1.0"

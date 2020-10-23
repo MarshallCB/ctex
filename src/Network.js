@@ -1,19 +1,19 @@
 import {Context} from './Context'
-import { iterate, dlv } from './utils'
+import { iterate, traverse } from './utils'
 
 
 function Network(def){
   let root = Context(def)()
   
   function is(r){
-    return dlv(root,r);
+    return traverse(root,r);
   }
   is.get = function(r){
-    let ans = dlv(root,r);
+    let ans = traverse(root,r);
     return (ans && ans._isCtex) ? ans.values() : ans;
   };
   is.post = function(r,data){
-    return dlv(root,r)(data);
+    return traverse(root,r)(data);
   };
   is.save = function(saveFn){
     let cb = (key,ctex) => ctex.subscribe((data) => saveFn(key,data))

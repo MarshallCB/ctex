@@ -103,7 +103,6 @@ properties('set() should work', () => {
 
 properties.run();
 
-
 // var Profile = Context({
 //   /**
 //    * @desc The name of the name

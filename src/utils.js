@@ -31,7 +31,7 @@ export function dset(obj,keys,val){
 }
 
 // from https://github.com/developit/dlv
-export function dlv(obj, key, p, undef) {
+export function traverse(obj, key, p, undef) {
   key = key.split('/');
   let o = obj
 	for (p = 0; p < key.length; p++) {

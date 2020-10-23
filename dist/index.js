@@ -35,7 +35,7 @@ function dset(obj,keys,val){
 }
 
 // from https://github.com/developit/dlv
-function dlv(obj, key, p, undef) {
+function traverse(obj, key, p, undef) {
   key = key.split('/');
   let o = obj;
 	for (p = 0; p < key.length; p++) {
@@ -44,12 +44,14 @@ function dlv(obj, key, p, undef) {
 	return o;
 }
 
-function parseObject(d){
+function parseObject(d,x){
   let mpn = [[],[],[]];
   Object.getOwnPropertyNames(d)
   .forEach(p => {
-    if(p !== 'init')
-      mpn[typeof d[p] === 'function' ? 0 : (d[p] && d[p]._isCtex) ? 2 : 1].push(p);
+    if(p !== 'init'){
+      x=d[p];
+      mpn[typeof x === 'function' ? 0 : (x && x._isCtex) ? 2 : 1].push(p);
+    }
   });
   return mpn
 }
@@ -64,10 +66,6 @@ class Ctex{
     let def = function(key,value,custom=false){
       Object.defineProperty(this,key,custom?value:{value});
     }.bind(this);
-    // init() function
-    def('init',impn[0].bind(this));
-    // root subscription key
-    def('r',Symbol());
     // marker
     def('_isCtex',true);
     // subscribers
@@ -75,13 +73,9 @@ class Ctex{
     // succinct way to define generator function to iterate over properties and nodes
     // used by the iterate function in utils
     def(Symbol.iterator,{*a(){yield* impn[2];yield* impn[3];}}.a);
-    def('_methods', impn[1]);
-    def('_properties', impn[2]);
-    def('_nodes', impn[3]);
     
-    let values = this.values.bind(this);
     // Set methods
-    impn[1].forEach(k => {
+    impn[1].map(k => {
       def(k,{
         set(x){ Promise.resolve(definition[k](x)); },
         get(){ return definition[k] },
@@ -89,17 +83,22 @@ class Ctex{
       },true);
     });
     // Set properties
-    impn[2].forEach(k => {
+    impn[2].map(k => {
       let { get, set } = Object.getOwnPropertyDescriptor(definition,k);
       def('_$'+k,{writable:true},true);
       def(k,get ? {get} : {
         set(x){
-          this[`_$${k}`] = set ? set(x) : x;
-          if(this.s[k]){
-            this.s[k].forEach(f => Promise.resolve(f(x)));
+          x = set ? set(x) : x;
+          this[`_$${k}`] = x;
+          let s = this.s;
+          if(s[k]){
+            for(let f of s[k])
+              Promise.resolve(x);
           }
-          if(this.s[this.r]){
-            this.s[this.r].forEach(f => Promise.resolve(f(values())));
+          if(s['']){
+            let vals = iterate(this);
+            for(let f of s[''])
+              Promise.resolve(vals);
           }
         },
         get(){
@@ -111,40 +110,41 @@ class Ctex{
         this[k] = initial[k] || definition[k];
     });
     // set inner nodes
-    impn[3].forEach(k => {
-      this[k] = definition[k];
-      this[k] instanceof Ctex ? this[k].set(initial[k]) : this[k]=this[k](initial[k]);
+    impn[3].map(k => {
+      def(k,{
+        set(x={}){
+          if(this[k] instanceof Ctex){
+            this[k].set(x);
+          } else {
+            this[k] = definition[k](x);
+          }
+        },
+        enumerable: true
+      },true);
+      this[k] = initial[k];
     });
     Object.seal(this);
-    this.init();
+    // call init function
+    impn[0].bind(this)();
   }
   subscribe(k,fn,id=Symbol()){
-    if(typeof k === 'function'){
-      fn = k;
-      k = this.r;
+    if(this[k] !== undefined){
+      // if only function is passed, assume they're subscribing to root function
+      if(!fn){
+        fn = k;
+        k = '';
+      }
+      if(this[k] && this[k]._isCtex){
+        // subscribe to context's root
+        return this[k].subscribe(fn)
+      }
+      this.s[k] = this.s[k]||new Set();
+      this.s[k].add(fn);
+      return ()=>this.s[k].delete(fn)
     }
-    if(!this.s[k]){
-      this.s[k] = new Map();
-    }
-    this.s[k].set(id, fn);
-    return ()=>this.s[k].delete(id);
   }
   set(obj={}, recurseFlag=true){
-    this._properties.forEach(k => {
-      if(obj[k] !== undefined){
-        this[k]=obj[k];
-      }
-    });
-    // for(let [k,v] of Object.entries(obj))
-    //   if(this[k] !== undefined && (this[k] == null || !this[k]._isCtex))
-    //     this[k]=v
-    // we want to iterate through the whole tree only for the original caller of set()
-    // otherwise, each ctext would set() and cause unnecessary set()'s
-    if(recurseFlag){
-      iterate(this,(key,ctex)=>{
-        ctex.set(dlv(obj,key),false);
-      });
-    }
+    Object.assign(this,obj);
   }
   values(){
     return iterate(this)
@@ -163,14 +163,14 @@ function Network(def){
   let root = Context(def)();
   
   function is(r){
-    return dlv(root,r);
+    return traverse(root,r);
   }
   is.get = function(r){
-    let ans = dlv(root,r);
+    let ans = traverse(root,r);
     return (ans && ans._isCtex) ? ans.values() : ans;
   };
   is.post = function(r,data){
-    return dlv(root,r)(data);
+    return traverse(root,r)(data);
   };
   is.save = function(saveFn){
     let cb = (key,ctex) => ctex.subscribe((data) => saveFn(key,data));
