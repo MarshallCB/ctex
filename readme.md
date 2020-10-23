@@ -12,7 +12,7 @@
   </a>
 </div>
 
-<div align="center">Simple state management</div>
+<div align="center">Simple observable objects</div>
 
 ## Features
 - Defined with an object literal
