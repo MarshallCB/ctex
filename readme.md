@@ -8,7 +8,7 @@
     <img src="https://badgen.now.sh/npm/v/ctex" alt="version" />
   </a>
   <a href="https://bundlephobia.com/result?p=ctex">
-    <img src="https://img.badgesize.io/MarshallCB/ctex/main/min.js?compression=brotli" alt="install size" />
+    <img src="https://img.badgesize.io/MarshallCB/ctex/main/es.js?compression=brotli" alt="install size" />
   </a>
 </div>
 
