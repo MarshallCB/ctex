@@ -83,7 +83,7 @@ class Ctex{
     // call init function
     impn[0].bind(this)()
   }
-  subscribe(k,fn,id=Symbol()){
+  subscribe(k,fn){
     if(this[k] !== undefined){
       // if only function is passed, assume they're subscribing to root function
       if(!fn){
@@ -100,7 +100,7 @@ class Ctex{
       return ()=>this.s[k].delete(fn)
     }
   }
-  set(obj={}, recurseFlag=true){
+  set(obj={}){
     Object.assign(this,obj)
   }
   values(){

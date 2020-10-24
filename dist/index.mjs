@@ -140,7 +140,7 @@ class Ctex{
       return ()=>this.s[k].delete(fn)
     }
   }
-  set(obj={}, recurseFlag=true){
+  set(obj={}){
     Object.assign(this,obj);
   }
   values(){
