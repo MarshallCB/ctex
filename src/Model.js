@@ -1,15 +1,17 @@
 import { iterate } from './utils'
 
-function parseObject(d,x){
-  let mpn = [[],[],[]]
+function parseDefinition(d,x){
+  let impn = [()=>{},[],[],[]]
   Object.getOwnPropertyNames(d)
   .forEach(p => {
+    x=d[p]
     if(p !== 'init'){
-      x=d[p]
-      mpn[typeof x === 'function' ? 0 : (x && x._isCtex) ? 2 : 1].push(p)
+      impn[typeof x === 'function' ? 1 : (x && x._isCtex) ? 3 : 2].push(p)
+    } else{
+      impn[0]=x
     }
   })
-  return mpn
+  return impn
 }
 
 // TODO: try replacing Map() with {}
@@ -45,21 +47,22 @@ class Ctex{
       def(k,get ? {get} : {
         set(x){
           x = set ? set(x) : x
-          if(this[`_$${k}`] !== x)
-          this[`_$${k}`] = x;
-          let s = this.s
-          if(s[k]){
-            for(let f of s[k])
-              Promise.resolve(f(x))
-          }
-          if(s['']){
-            let vals = iterate(this)
-            for(let f of s[''])
-              Promise.resolve(f(vals))
+          if(this['_$'+k] !== x){
+            this['_$'+k] = x;
+            let s = this.s
+            if(s[k]){
+              for(let f of s[k])
+                Promise.resolve(f(x))
+            }
+            if(s['']){
+              let vals = iterate(this)
+              for(let f of s[''])
+                Promise.resolve(f(vals))
+            }
           }
         },
         get(){
-          return this[`_$${k}`]
+          return this['_$'+k]
         },
         enumerable: true
       },true)
@@ -110,11 +113,13 @@ class Ctex{
 }
 
 function Model(definition){
-  let { init, ...rest } = definition
-  let mpn = parseObject(rest)
-  let fn = (initial={}) => new Ctex([init || (()=>{}),...mpn],definition,initial)
+  let fn = (initial) => Context(definition,initial)
   fn._isCtex = true;
   return fn;
 }
 
-export { Model }
+function Context(definition,initial={}){
+  return new Ctex(parseDefinition(definition),definition,initial)
+}
+
+export { Model, Context }
