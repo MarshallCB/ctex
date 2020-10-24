@@ -14,10 +14,6 @@ function parseDefinition(d,x){
   return impn
 }
 
-// TODO: try replacing Map() with {}
-// TODO: generalize flattie to improve values() and set() for arrays and objects
-// TODO: include flag for whether root subscription should trigger save (no if from internal node)
-
 class Ctex{
   constructor(impn,definition,initial){
     // this.init = impn[0].bind(this)
