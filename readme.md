@@ -12,22 +12,20 @@
   </a>
 </div>
 
-<div align="center">Observable objects for simple state management</div>
+<div align="center">Observable objects ~> simple state management</div>
 
-## Features
+# Features
 - Defined with an object literal (simple!)
 - Every property is observable (can be subscribed to)
-- Composable (Contexts can contain other Contexts)
-- Effortlessly synchronize with browser storage (IndexedDB)
+- Composable (Contexts can contain/wrap other Contexts)
+- Effortlessly synchronize with external storage (IndexedDB, MongoDB, FaunaDB, etc.)
 - Small (~1kB)
 
-## API
+# API
 
 ### `Model`
 
 `Model`s are templates for Contexts. When a model is invoked, it creates a [`Context`](#Context) object.
-
----
 
 **Person.js**
 
@@ -42,8 +40,6 @@ export let Person = Model({
 })
 ```
 
----
-
 **example.js**
 
 In this file, we create multiple 'Person' Contexts
@@ -56,6 +52,8 @@ let marshall = Person({ name: "Marshall" }) // {name: "Marshall", age: 0}
 let macy = Person({ name: "Macy", age: 21 }) // {name: "Macy", age: 21}
 let anon = Person() // {name: "No name", age: 0}
 ```
+
+---
 
 ### `Context`
 
@@ -120,7 +118,7 @@ game.goal = 'blue' // equivalent to: game.goal('blue')
 
 ### `Network`
 
-`Network` is intended to be a top-level state API that contains multiple contexts and a default state. It allows for asynchronous loading/saving to an external source (such as IndexedDB). It also creates a REST-like API to access any `Ctex` within it.
+`Network` is intended to be a top-level state API that contains multiple contexts and a default state. It allows for asynchronous loading/saving to an external source (such as IndexedDB). It also creates a REST-like API to access any `Contex` within it.
 
 For example, accessing the innermost value of `{ a: { b: { c: "d" }}}` would look like `network("a/b/c")`
 
@@ -142,6 +140,6 @@ let is = Network({
 })
 ```
 
-## License
+# License
 
 MIT © [Marshall Brandt](https://m4r.sh)
