@@ -14,14 +14,14 @@
 
 <div align="center">Observable objects ~> simple state management</div>
 
-# Features
+## Features
 - Defined with an object literal (simple!)
 - Every property is observable (can be subscribed to)
 - Composable (Contexts can contain/wrap other Contexts)
 - Effortlessly synchronize with external storage (IndexedDB, MongoDB, FaunaDB, etc.)
 - Small (~1kB)
 
-# API
+## API
 
 ### `Model`
 
@@ -116,6 +116,8 @@ game.goal = 'blue' // equivalent to: game.goal('blue')
 
 ```
 
+---
+
 ### `Network`
 
 `Network` is intended to be a top-level state API that contains multiple contexts and a default state. It allows for asynchronous loading/saving to an external source (such as IndexedDB). It also creates a REST-like API to access any `Contex` within it.
@@ -140,6 +142,6 @@ let is = Network({
 })
 ```
 
-# License
+## License
 
 MIT © [Marshall Brandt](https://m4r.sh)

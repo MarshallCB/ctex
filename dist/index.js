@@ -5,16 +5,13 @@ Object.defineProperty(exports, '__esModule', { value: true });
 // from https://github.com/lukeed/flattie
 function iterate(val, callback=(()=>{}), sep='/', key='', out={}) {
   var k, pfx = key ? (key + sep) : key;
-  if (val && val._isCtex){
-    callback(key,val);
-    for (k of val) {
-      iterate(val[k], callback, sep, pfx+k, out);
-    }
-  }else if (Array.isArray(val)) {
+  if (Array.isArray(val)) {
     for (k=0; k < val.length; k++) {
       iterate(val[k], callback, sep, pfx+k, out);
     }
   } else if(val && typeof val == 'object') {
+    if(val._isCtex)
+      callback(key,val);
     for (k in val) {
       iterate(val[k], callback, sep, pfx+k, out);
     }
@@ -73,17 +70,13 @@ class Ctex{
     defineProp('_isCtex',true);
     // subscribers (s for brevity)
     defineProp('s',{});
-    // succinct way to define generator function to iterate over properties and nodes
-    // used by the iterate function in utils
-    defineProp(Symbol.iterator,{*a(){yield* impn[2];yield* impn[3];}}.a);
     
     // Set methods
     impn[1].map(k => {
       defineProp(k,{
         // allows for shorthand calls to methods in generator functions: menu.choose = yield it.choice(menu)
-        set(x){ Promise.resolve(definition[k](x)); },
-        get(){ return definition[k] },
-        enumerable: true
+        set(x){ definition[k](x); },
+        get(){ return definition[k] }
       },true);
     });
     // Set properties
@@ -129,7 +122,7 @@ class Ctex{
           if(this[k] instanceof Ctex){
             this[k].set(x);
           } else {
-            // if the instance hasn't been invoked yet, invoke the original definition in the definition (TODO: improve)
+            // if the instance hasn't been invoked yet, invoke the original definition (TODO: improve)
             this[k] = definition[k](x);
           }
         },

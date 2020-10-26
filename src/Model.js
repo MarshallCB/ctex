@@ -29,17 +29,13 @@ class Ctex{
     defineProp('_isCtex',true)
     // subscribers (s for brevity)
     defineProp('s',{})
-    // succinct way to define generator function to iterate over properties and nodes
-    // used by the iterate function in utils
-    defineProp(Symbol.iterator,{*a(){yield* impn[2];yield* impn[3]}}.a)
     
     // Set methods
     impn[1].map(k => {
       defineProp(k,{
         // allows for shorthand calls to methods in generator functions: menu.choose = yield it.choice(menu)
-        set(x){ Promise.resolve(definition[k](x)) },
-        get(){ return definition[k] },
-        enumerable: true
+        set(x){ definition[k](x) },
+        get(){ return definition[k] }
       },true)
     })
     // Set properties
@@ -85,7 +81,7 @@ class Ctex{
           if(this[k] instanceof Ctex){
             this[k].set(x)
           } else {
-            // if the instance hasn't been invoked yet, invoke the original definition in the definition (TODO: improve)
+            // if the instance hasn't been invoked yet, invoke the original definition (TODO: improve)
             this[k] = definition[k](x)
           }
         },

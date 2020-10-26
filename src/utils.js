@@ -1,16 +1,13 @@
 // from https://github.com/lukeed/flattie
 export function iterate(val, callback=(()=>{}), sep='/', key='', out={}) {
   var k, pfx = key ? (key + sep) : key;
-  if (val && val._isCtex){
-    callback(key,val)
-    for (k of val) {
-      iterate(val[k], callback, sep, pfx+k, out);
-    }
-  }else if (Array.isArray(val)) {
+  if (Array.isArray(val)) {
     for (k=0; k < val.length; k++) {
       iterate(val[k], callback, sep, pfx+k, out);
     }
   } else if(val && typeof val == 'object') {
+    if(val._isCtex)
+      callback(key,val)
     for (k in val) {
       iterate(val[k], callback, sep, pfx+k, out);
     }
