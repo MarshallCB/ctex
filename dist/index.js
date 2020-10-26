@@ -86,7 +86,7 @@ class Ctex{
       defineProp(k,get ? {get} : {
         set(x){
           // if custom setter function exists, use returned value from set function
-          x = set ? set(x) : x;
+          x = set ? set.bind(this)(x) : x;
           // ensure that this update changed the value (TODO: always flag?)
           if(this['_$'+k] !== x){
             this['_$'+k] = x;
@@ -170,6 +170,8 @@ function Model(definition){
   return fn;
 }
 
+let Context = (definition)=>Model(definition)();
+
 function Network(def){
   let root = Model(def)();
   
@@ -202,5 +204,6 @@ function Network(def){
   return is;
 }
 
+exports.Context = Context;
 exports.Model = Model;
 exports.Network = Network;

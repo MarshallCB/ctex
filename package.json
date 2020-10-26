@@ -26,7 +26,8 @@
   "scripts": {
     "build": "rollup -c",
     "test": "uvu -r esm test",
-    "bench": "node -r esm bench"
+    "bench": "node -r esm bench",
+    "dev": "npm run build && npm run test && npm run bench"
   },
   "keywords": [
     "state",
