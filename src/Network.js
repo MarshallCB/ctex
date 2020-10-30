@@ -21,7 +21,8 @@ function Network(def){
     iterate(root, cb)
     return is;
   }
-  is.load = function(loadFn){
+  is.pull = function(loadFn){
+    // TODO: fix this later
     let cb = (key,ctex)=>{
       Promise.resolve(loadFn(key))
         .then(v => root.set(v))
@@ -30,6 +31,16 @@ function Network(def){
     cb('index',root)
     iterate(root, cb)
     return is;
+  }
+  is.load = function(keys){
+    if(keys){
+      keys.map(k => {
+        this.pull()
+      })
+    }
+    else{
+      // todo: iterate on all objects in index
+    }
   }
   return is;
 }

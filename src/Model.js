@@ -89,10 +89,10 @@ class Ctex{
       },true)
       this[k] = initial[k]
     })
-    // Prevent object from being modified, but values can be written to
-    Object.seal(this)
     // call init function
     impn[0].call(this)
+    // Prevent object from being modified, but values can be written to
+    Object.seal(this)
   }
   // subscribe(key, fn)  => keyed subscription
   // subscribe(fn) => root subscription (listen for all updates)

@@ -1,49 +1,39 @@
-var { Context } = require('./dist')
+var { createModel, create } = require('./src/Model2')
 
-// Define Contexts
-let Child = Context({
-  cookies: 0,
-  name: "",
-  age: 0,
-  happy: false,
-  init(){
-    this.subscribe('cookies',function(num){
-      this.happy = num > 0
-    })
-  },
-  stealCookie(){
-    this.cookies = 1;
-  },
-  caught(){
-    this.cookies = 0;
-  }
-})
+// Define Models
+// let Child = Model({
+//   cookies: 0,
+//   name: "",
+//   age: 0,
+//   happy: false,
+//   init(){
+//     this.subscribe('cookies',function(num){
+//       this.happy = num > 0
+//     })
+//   },
+//   stealCookie(){
+//     this.cookies = 1;
+//   },
+//   caught(){
+//     this.cookies = 0;
+//   }
+// })
 
-let Parent = Context({
+let Parent = createModel({
   name: "",
   kids: [],
   checkJar(){
-    this.kids.map(kid => kid.caught())
+    console.log("hello")
   }
 })
 
 // Initialize 
 
 let parent = Parent({
-    name: "J",
-    kids: [
-      Child({
-        name: "John",
-        age: 10
-      }),
-      Child({
-        name: "Jane",
-        age: 12
-      })
-    ]
-  })
+  name: "J",
+  kids: ["Hlo"]
+})
 
-  parent.subscribe('name', (x)=>{
-    console.log(x)
-  })
-  parent.name= "HELLO"
+  console.log(parent.checkJar())
+ console.log(Parent)
+ console.log(Parent.prototype)

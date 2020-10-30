@@ -21,6 +21,10 @@
 - Effortlessly synchronize with external storage (IndexedDB, MongoDB, FaunaDB, etc.)
 - Small (~1kB)
 
+## Overview
+
+![Model, Context, Network](https://github.com/marshallcb/ctex/raw/main/overview.png)
+
 ## API
 
 ### `Model`

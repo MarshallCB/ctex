@@ -130,10 +130,10 @@ class Ctex{
       },true);
       this[k] = initial[k];
     });
-    // Prevent object from being modified, but values can be written to
-    Object.seal(this);
     // call init function
     impn[0].call(this);
+    // Prevent object from being modified, but values can be written to
+    Object.seal(this);
   }
   // subscribe(key, fn)  => keyed subscription
   // subscribe(fn) => root subscription (listen for all updates)
@@ -191,7 +191,8 @@ function Network(def){
     iterate(root, cb);
     return is;
   };
-  is.load = function(loadFn){
+  is.pull = function(loadFn){
+    // TODO: fix this later
     let cb = (key,ctex)=>{
       Promise.resolve(loadFn(key))
         .then(v => root.set(v))
@@ -200,6 +201,13 @@ function Network(def){
     cb('index');
     iterate(root, cb);
     return is;
+  };
+  is.load = function(keys){
+    if(keys){
+      keys.map(k => {
+        this.pull();
+      });
+    }
   };
   return is;
 }
