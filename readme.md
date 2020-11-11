@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/marshallcb/ctex/raw/main/ctex.png" alt="ctex" width="150" />
+  <img src="https://github.com/marshallcb/ctex/raw/main/docs/ctex.png" alt="ctex" width="150" />
 </div>
 
 <h1 align="center">ctex</h1>
