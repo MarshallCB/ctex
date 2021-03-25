@@ -1,5 +1,4 @@
 node_modules
-meta
 .DS_Store
 *-lock.*
 *.lock
