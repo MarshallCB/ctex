@@ -30,7 +30,7 @@ Contexts are just like normal objects, but they have two main differences.
 
 Contexts and each of their properties can be subscribed to using the `$` helper.
 
-**Subscribing to all changes**
+**Subscribing to all changes:** `ctx.$(callback)`
 ```js
 import { Context } from 'ctex'
 
@@ -42,10 +42,9 @@ let counter = Context({
   }
 })
 
-// Callback is invoked on every property change
+// Callback is invoked when counter's data updates
 counter.$( ({ x, y }) => {
   console.log(`Here with x=${x} and y=${y}`)
-  console.log({ x, y })
 } )
 
 counter.inc()
@@ -54,7 +53,7 @@ counter.y = 7
 // ~> Here with x=1 and y=7
 ```
 
-**Subscribing to specific changes**
+**Subscribing to specific properties:** `ctx.$.<property>(callback)`
 ```js
 import { Context } from 'ctex'
 
@@ -72,7 +71,7 @@ counter.$.y( (value, prev) => {
 } )
 
 counter.inc()
-// *nothing happens*
+// *callback not triggered because y hasn't changed*
 counter.y = 7
 // ~> y changed from 0 to 7
 ```
