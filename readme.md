@@ -122,7 +122,7 @@ let Person = Model({
   name: "No Name",
   age: 0,
   birthday(){
-    age++;
+    this.age++;
   }
 })
 
