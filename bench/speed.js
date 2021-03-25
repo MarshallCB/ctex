@@ -1,8 +1,7 @@
-import { Model, Network } from '../dist';
+import { Model } from '../dist';
 import { Suite } from 'benchmark';
 
 export function speed(){
-  console.log('\Object creation:');
   const bench = new Suite().on('cycle', e => {
     console.log('  ' + e.target);
   });
@@ -45,9 +44,8 @@ export function speed(){
       hello: "World"
     }
   }
-  console.log('\Object setting:');
   bench.add('Model Set', () => {
-    example2.set({
+    example2({
       name: "Mark",
       age: 53,
       stuff: {

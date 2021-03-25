@@ -44,20 +44,20 @@ import {Model} from '../dist';
     assert.is(shaz.cool, false);
   });
   
-  properties('values() should work', () => {
-    assert.equal(marshall.values(),{
+  properties('context function should return values', () => {
+    assert.equal(marshall(),{
       name: "Marshall",
       age: 0,
       fact: null,
       cool: false
     })
-    assert.equal(macy.values(),{
+    assert.equal(macy(),{
       age: 21,
       fact: "Hey I'm super cool",
       cool: true,
       name: "Macy"
     })
-    assert.equal(shaz.values(),{
+    assert.equal(shaz(),{
       age: 444,
       name: "Shaz",
       fact: null,
@@ -72,10 +72,10 @@ import {Model} from '../dist';
     assert.is(shaz.fact, "One Two")
   })
   
-  properties('set() should work', () => {
-    marshall.set({ cool: true })
+  properties('setting with context function should work', () => {
+    marshall({ cool: true })
     assert.is(marshall.cool, true)
-    marshall.set({ name: "MarshallCB", fact: "M#" })
+    marshall({ name: "MarshallCB", fact: "M#" })
     assert.is(marshall.name, "MarshallCB")
     assert.is(marshall.fact, "M#")
     assert.is(marshall.age, 0)

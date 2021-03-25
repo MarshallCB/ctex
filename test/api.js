@@ -1,23 +1,20 @@
 import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
-import {Model} from '../dist';
+import {Model, CTEX, Context} from '../dist';
 
   const API = suite('exports');
   
-  API('should export an function', () => {
-    assert.type(Model, 'function');
-  });
-  
-  API('should return a function', () => {
+  API('Model should return a function', () => {
     assert.type(Model({}), 'function');
   });
   
-  API('uninvoked definition should have _isCtex', () => {
-    assert.is(Model({})._isCtex, true);
+  API('Model should have Model symbol', () => {
+    assert.is(Model({})[CTEX.MODEL], true);
   });
   
-  API('invoked definition should have _isCtex', () => {
-    assert.is(Model({})()._isCtex, true);
+  API('Context should have Context symbol', () => {
+    assert.is(Model({})()[CTEX.CONTEXT], true);
+    assert.is(Context({})[CTEX.CONTEXT], true);
   });
   
   API.run();

@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/marshallcb/ctex/raw/main/docs/ctex.png" alt="ctex" width="150" />
+  <img src="https://github.com/marshallcb/ctex/raw/main/meta/ctex.png" alt="ctex" width="150" />
 </div>
 
 <h1 align="center">ctex</h1>
@@ -12,139 +12,189 @@
   </a>
 </div>
 
-<div align="center">Observable objects ~> simple state management</div>
+<div align="center">Observable objects</div>
 
-## Features
-- Defined with an object literal (simple!)
+# Features
+- Defined with an object literal
 - Every property is observable (can be subscribed to)
 - Composable (Contexts can contain/wrap other Contexts)
-- Effortlessly synchronize with external storage (IndexedDB, MongoDB, FaunaDB, etc.)
-- Small (~1kB)
+- Small (~500B)
 
-## Overview
+# API
 
-![Model, Context, Network](https://github.com/marshallcb/ctex/raw/main/overview.png)
+## `Context`
 
-## API
+Contexts are just like normal objects, but they have two main differences. 
+
+#### 1. Observable
+
+Contexts and each of their properties can be subscribed to using the `$` helper.
+
+**Subscribing to all changes**
+```js
+import { Context } from 'ctex'
+
+let counter = Context({
+  x: 0,
+  y: 0,
+  inc(){
+    this.x++;
+  }
+})
+
+// Callback is invoked on every property change
+counter.$( ({ x, y }) => {
+  console.log(`Here with x=${x} and y=${y}`)
+  console.log({ x, y })
+} )
+
+counter.inc()
+// ~> Here with x=1 and y=0
+counter.y = 7
+// ~> Here with x=1 and y=7
+```
+
+**Subscribing to specific changes**
+```js
+import { Context } from 'ctex'
+
+let counter = Context({
+  x: 0,
+  y: 0,
+  inc(){
+    this.x++;
+  }
+})
+
+// Callback is invoked only when y changes
+counter.$.y( (value, prev) => {
+  console.log(`y changed from ${prev} to ${value}`)
+} )
+
+counter.inc()
+// *nothing happens*
+counter.y = 7
+// ~> y changed from 0 to 7
+```
+
+#### 2. Actually a function
+
+A Context's value is a function for **saving** and **loading** state. It only returns serializable data (no functions)
+
+**Accessing State** (for saving)
+```js
+import { Context } from 'ctex'
+// -- Plain object --
+let obj = { x: 2 }
+console.log(obj) // ~> { x: 2 }
+
+// -- Context --
+let ctx = Context({ x: 2 })
+console.log(ctx()) // ~> { x: 2 }
+
+// -- Same for both --
+obj.x = 3;
+console.log(obj.x) // ~> 3
+
+ctx.x = 3;
+console.log(ctx.x) // ~> 3
+```
+
+**Setting State** (for loading)
+```js
+import { Context } from 'ctex'
+// -- Plain object --
+let obj = { x: 1, y: 2, z: 3 }
+obj = { ...obj, x: 4, y: 5 }
+
+// Context
+let ctx = Context({ x: 1, y: 2, z: 3 })
+ctx({ x: 4, y: 5 })
+```
+
+***Why?***
+
+If we have a Model, we can easily save/restore state for specific instances / Contexts
+
+```js
+import { Model } from 'ctex'
+
+let Person = Model({
+  name: "No Name",
+  age: 0,
+  birthday(){
+    age++;
+  }
+})
+
+let marshall = Person({ name: "Marshall", age: 21 })
+// Save (to database, local storage, etc)
+let saved = JSON.stringify(marshall())
+// Load (from database, local storage, etc)
+let restored_marshall = Person(JSON.parse(saved))
+restored()
+// ~> { name: "Marshall", age: 21 }
+```
+
 
 ### `Model`
 
-`Model`s are templates for Contexts. When a model is invoked, it creates a [`Context`](#Context) object.
+Models are templates for Contexts. When a model function is invoked, it creates a [`Context`](#Context) object.
 
 **Person.js**
 
-In this file, we define a Person with `{name, age}` defaults.
+In this file, we define a Person Model with `{name, age}` defaults.
 
 ```js
 import { Model } from 'ctex';
 
 export let Person = Model({
   name: "No name",
-  age: 0
+  age: 0,
+  birthday(){
+    this.age++;
+  }
 })
 ```
 
 **example.js**
 
-In this file, we create multiple 'Person' Contexts
+In this file, we create a `Person` Context
+
 ```js
 import { Person } from './Person.js';
 
-// Creating multiple Ctex instances based on the Person model
+// Create a Person Context and override the `name` value
+let marshall = Person({ name: "Marshall" })
+// Get current values
+marshall() // ~> { name: "Marshall", age: 0 }
+// Set `age` property
+marshall.age = 21
+// Call Person `birthday` method
+marshall.birthday()
+// Get age value
+marshall.age // ~> 22
+// Set multiple properties at a time (shortcut)
+marshall({
+  age: 30,
+  name: "Marshall2"
+}) // ~> { name: "Marshall2", age: 30 }
 
-let marshall = Person({ name: "Marshall" }) // {name: "Marshall", age: 0}
-let macy = Person({ name: "Macy", age: 21 }) // {name: "Macy", age: 21}
-let anon = Person() // {name: "No name", age: 0}
-```
-
----
-
-### `Context`
-
-Think of `Context` instances like specialized objects that can be subscribed to.
-
-```js
-import { Context } from 'ctex';
-
-let game = Context({
-  red: 0,
-  blue: 0,
-  goal(team){
-    if(team === 'red')
-      this.red += 1;
-    if(team === 'blue')
-      this.blue += 1;
-  }
+// Subscribe to all property changes
+marshall.$(({ age, name }) => {
+  console.log("marshall has changed")
 })
 
-// Subscribe to the "red" property in game
-game.subscribe('red', (redScore) => {
-  console.log("RED!!! "+redScore);
+// Subscribe to when age changes
+marshall.$.age((age, prev_age) => {
+  console.log("marshall is older now")
 })
-// Subscribe to the "blue" property in game
-game.subscribe('blue', (blueScore) => {
-  console.log("blue!! "+blueScore);
-})
-
-// Subscribe to all property updates
-// values passed into callback function are the same as game.values()
-game.subscribe((values) => {
-  // console.log(values)
-})
-
-// invoke the "goal" method in game
-game.goal('blue');  // ~> blue!! 1
-game.goal('blue');  // ~> blue!! 2
-game.goal('red');   // ~> RED!!! 1
-
-// Get all the values in game
-game.values() // ~> { red: 1, blue: 2 }
-
-// Each property is directly readable
-console.log(game.blue) // ~> 2
-console.log(game.red) // ~> 1
-
-// Each property can be directly set
-game.red = 3;   // ~> RED!!! 3
-
-// Set multiple properties at once (and notify subscribers)
-game.set({ blue: 0, red: 0 })
-// ~> blue!! 0
-// ~> RED!!! 0
-
-// ~ Special feature ~
-// Call context methods by setting
-// This is useful for generator functions
-game.goal = 'blue' // equivalent to: game.goal('blue')
-
 
 ```
 
----
+# How it Works
 
-### `Network`
-
-`Network` is intended to be a top-level state API that contains multiple contexts and a default state. It allows for asynchronous loading/saving to an external source (such as IndexedDB). It also creates a REST-like API to access any `Contex` within it.
-
-For example, accessing the innermost value of `{ a: { b: { c: "d" }}}` would look like `network("a/b/c")`
-
-```js
-import { Network, Context, Model } from 'ctex';
-
-let is = Network({
-  name: "",
-  notes: Context({
-    all: [],
-    addNote(text){
-      this.all.push(text)
-    }
-  })
-}).load((key) => {
-  // fetch data, return value or Promise
-}).save((key, data) => {
-  // save data to external location
-})
-```
+The power of the [`Proxy`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
 
 ## License
 
