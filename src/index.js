@@ -22,13 +22,12 @@ class CtexInner{
       const v = o[k];
       const p = this.values[k];
       if(p && p[CTEX.CONTEXT]){
-        // TODO: check for deep equal
-        triggers.push([k,p(v)]);
+        const prev = p()
+        triggers.push([k,p(v),prev]);
       } else {
-        // TODO: check for deep equal
         if(p !== v){
           this.values[k] = v;
-          triggers.push([k,v]);
+          triggers.push([k,v,p]);
         }
       }
     }
@@ -36,11 +35,11 @@ class CtexInner{
     if(triggers.length > 0){
       // Add "total" trigger if some value changed
       triggers.push(['', this.all()])
-      triggers.forEach( ([sub_key,value]) => {
+      triggers.forEach( ([sub_key,value,prev]) => {
         const s = this.subs[sub_key];
         if(s){
           for(const f of s){
-            f(value)
+            f(value,prev)
           }
         }
       })
