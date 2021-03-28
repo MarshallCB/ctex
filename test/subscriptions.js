@@ -29,7 +29,7 @@ Sub('Root Subscription should fire once on bulk load', () => new Promise((res,re
     assert.is(y, 3)
     res()
   })
-  ctx({x: 2, y: 3})
+  Object.assign(ctx,{x:2,y:3})
 }));
 
 Sub('Property Subscription should fire on property change', () => new Promise((res,rej) => {
@@ -38,7 +38,7 @@ Sub('Property Subscription should fire on property change', () => new Promise((r
     assert.is(x, 5)
     res()
   })
-  ctx.x = 5;
+  Object.assign(ctx,{x:5})
 }));
 
 Sub('Property Subscription should fire once on bulk load', () => new Promise((res,rej) => {
@@ -47,7 +47,7 @@ Sub('Property Subscription should fire once on bulk load', () => new Promise((re
     assert.is(y, 6)
     res()
   })
-  ctx({x: 7, y: 6})
+  Object.assign(ctx,{x: 7,y: 6})
 }));
 
 Sub.run();

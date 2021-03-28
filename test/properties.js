@@ -45,19 +45,19 @@ import {Model} from '../dist';
   });
   
   properties('context function should return values', () => {
-    assert.equal(marshall(),{
+    assert.equal(marshall,{
       name: "Marshall",
       age: 0,
       fact: null,
       cool: false
     })
-    assert.equal(macy(),{
+    assert.equal(macy,{
       age: 21,
       fact: "Hey I'm super cool",
       cool: true,
       name: "Macy"
     })
-    assert.equal(shaz(),{
+    assert.equal(shaz,{
       age: 444,
       name: "Shaz",
       fact: null,
@@ -73,9 +73,9 @@ import {Model} from '../dist';
   })
   
   properties('setting with context function should work', () => {
-    marshall({ cool: true })
+    Object.assign(marshall,{ cool: true })
     assert.is(marshall.cool, true)
-    marshall({ name: "MarshallCB", fact: "M#" })
+    Object.assign(marshall,{ name: "MarshallCB", fact: "M#" })
     assert.is(marshall.name, "MarshallCB")
     assert.is(marshall.fact, "M#")
     assert.is(marshall.age, 0)

@@ -3,6 +3,7 @@
 </div>
 
 <h1 align="center">ctex</h1>
+<h3 align="center">Observable objects</h3>
 <div align="center">
   <a href="https://npmjs.org/package/ctex">
     <img src="https://badgen.now.sh/npm/v/ctex" alt="version" />
@@ -12,11 +13,10 @@
   </a>
 </div>
 
-<div align="center">Observable objects</div>
 
 # Features
-- Defined with an object literal
-- Every property is observable (can be subscribed to)
+- Works like a normal object literal
+- Every property can be subscribed to
 - Composable (Contexts can contain/wrap other Contexts)
 - Small (~500B)
 
@@ -24,9 +24,9 @@
 
 ## `Context`
 
-Contexts are just like normal objects, but they have two main differences. 
+Contexts behave like normal objects, with one main difference:
 
-#### 1. Observable
+#### Subscribable properties
 
 Contexts and each of their properties can be subscribed to using the `$` helper.
 
@@ -89,7 +89,7 @@ console.log(obj) // ~> { x: 2 }
 
 // -- Context --
 let ctx = Context({ x: 2 })
-console.log(ctx()) // ~> { x: 2 }
+console.log(ctx) // ~> { x: 2 }
 
 // -- Same for both --
 obj.x = 3;
@@ -104,11 +104,11 @@ console.log(ctx.x) // ~> 3
 import { Context } from 'ctex'
 // -- Plain object --
 let obj = { x: 1, y: 2, z: 3 }
-obj = { ...obj, x: 4, y: 5 }
+Object.assign(obj,{ x:4, y:5 })
 
-// Context
+// -- Context --
 let ctx = Context({ x: 1, y: 2, z: 3 })
-ctx({ x: 4, y: 5 })
+Object.assign(obj,{ x:4, y:5 })
 ```
 
 ***Why?***
@@ -122,16 +122,16 @@ let Person = Model({
   name: "No Name",
   age: 0,
   birthday(){
-    this.age++;
+    this.age++
   }
 })
 
 let marshall = Person({ name: "Marshall", age: 21 })
 // Save (to database, local storage, etc)
-let saved = JSON.stringify(marshall())
+let serialized = JSON.stringify(marshall)
 // Load (from database, local storage, etc)
-let restored_marshall = Person(JSON.parse(saved))
-restored()
+let restored = Person(JSON.parse(serialized))
+console.log(restored)
 // ~> { name: "Marshall", age: 21 }
 ```
 

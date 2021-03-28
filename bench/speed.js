@@ -45,7 +45,7 @@ export function speed(){
     }
   }
   bench.add('Model Set', () => {
-    example2({
+    Object.assign(example2,{
       name: "Mark",
       age: 53,
       stuff: {
