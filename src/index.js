@@ -5,14 +5,6 @@ const CTEX = {
 
 import { dequal } from 'dequal/lite'
 
-/**
- * TODO:
- * - setter should not be by object since that never occurs
- * - bulk subcribe should use a timer or something to not trigger for every single set() in an OBject.assign()
- * - SETTING with a live context should replace the current context with that actual context
- * - Should be possible to link multiple contexts together seamslessly (neighbors and children)
- */
-
 class CtexInner{
   constructor(definition){
     this.values = {}
