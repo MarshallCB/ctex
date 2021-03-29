@@ -18,15 +18,14 @@
 - Works like a normal object literal
 - Every property can be subscribed to
 - Composable (Contexts can contain/wrap other Contexts)
-- Small (~500B)
 
 # API
 
 ## `Context`
 
-Contexts behave like normal objects, with one main difference:
+Contexts mostly behave like normal objects. Internally, they behave differently to allow for subscribable properties and to simplify serializing state.
 
-#### Subscribable properties
+### Subscribable properties
 
 Contexts and each of their properties can be subscribed to using the `$` helper.
 
@@ -74,41 +73,6 @@ counter.inc()
 // *callback not triggered because y hasn't changed*
 counter.y = 7
 // ~> y changed from 0 to 7
-```
-
-#### 2. Actually a function
-
-A Context's value is a function for **saving** and **loading** state. It only returns serializable data (no functions)
-
-**Accessing State** (for saving)
-```js
-import { Context } from 'ctex'
-// -- Plain object --
-let obj = { x: 2 }
-console.log(obj) // ~> { x: 2 }
-
-// -- Context --
-let ctx = Context({ x: 2 })
-console.log(ctx) // ~> { x: 2 }
-
-// -- Same for both --
-obj.x = 3;
-console.log(obj.x) // ~> 3
-
-ctx.x = 3;
-console.log(ctx.x) // ~> 3
-```
-
-**Setting State** (for loading)
-```js
-import { Context } from 'ctex'
-// -- Plain object --
-let obj = { x: 1, y: 2, z: 3 }
-Object.assign(obj,{ x:4, y:5 })
-
-// -- Context --
-let ctx = Context({ x: 1, y: 2, z: 3 })
-Object.assign(obj,{ x:4, y:5 })
 ```
 
 ***Why?***

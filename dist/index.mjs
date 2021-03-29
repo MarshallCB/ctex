@@ -50,7 +50,7 @@ class CtexInner{
       set: (_,k,v) => this.setter(k,v)
     });
     Object.keys(definition).forEach(k => {
-      const v = definition[k];
+      let v = definition[k];
       if(v){
         if(v[CTEX.MODEL]){ v = v({}); }
         if(v[CTEX.CONTEXT]){
@@ -118,7 +118,15 @@ class CtexInner{
   }
   getter(k){
     const v = this.values[k];
-    return (v && v[CTEX.CONTEXT]) ? { ...v } : v;
+    return (v && v[CTEX.CONTEXT]) ? new Proxy({ ...v },{
+      get(_,k){
+        return v[k];
+      },
+      set(_,k,new_val){
+        v[k] = new_val;
+        return true;
+      }
+    }) : v;
   }
   all(){
     let o = {};
