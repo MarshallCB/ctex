@@ -37,14 +37,6 @@ const CTEX = {
   MODEL: Symbol('ctex-model')
 };
 
-/**
- * TODO:
- * - setter should not be by object since that never occurs
- * - bulk subcribe should use a timer or something to not trigger for every single set() in an OBject.assign()
- * - SETTING with a live context should replace the current context with that actual context
- * - Should be possible to link multiple contexts together seamslessly (neighbors and children)
- */
-
 class CtexInner{
   constructor(definition){
     this.values = {};
@@ -143,7 +135,8 @@ class CtexInner{
   }
 }
 
-function Model(definition){
+function Model(){
+  const definition = Object.assign({},...arguments);
   let model_fn = (initial={}) => {
     const inner = new CtexInner(definition);
     Object.keys(initial).forEach(k => {
@@ -170,7 +163,7 @@ function Model(definition){
   return model_fn;
 }
 
-const Context = (definition)=>Model(definition)();
+const Context = ()=>Model(...arguments)();
 
 exports.CTEX = CTEX;
 exports.Context = Context;
