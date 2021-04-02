@@ -135,8 +135,13 @@ class CtexInner{
   }
 }
 
-function Model(){
-  const definition = Object.assign({},...arguments);
+function Model(...args){
+  let definition = {};
+  args.forEach(arg => {
+    if(arg){
+      Object.assign(definition,arg[CTEX.MODEL] || arg);
+    }
+  });
   let model_fn = (initial={}) => {
     const inner = new CtexInner(definition);
     Object.keys(initial).forEach(k => {
@@ -159,11 +164,11 @@ function Model(){
       set: (_,k,v) => inner.setter(k,v)
     })
   };
-  model_fn[CTEX.MODEL] = true;
+  model_fn[CTEX.MODEL] = definition;
   return model_fn;
 }
 
-const Context = ()=>Model(...arguments)();
+const Context = (...args)=>Model(...args)();
 
 exports.CTEX = CTEX;
 exports.Context = Context;

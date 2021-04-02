@@ -103,9 +103,9 @@ class CtexInner{
   }
 }
 
-function Model(){
+function Model(...args){
   let definition = {}
-  arguments.forEach(arg => {
+  args.forEach(arg => {
     if(arg){
       Object.assign(definition,arg[CTEX.MODEL] || arg)
     }
@@ -136,6 +136,6 @@ function Model(){
   return model_fn;
 }
 
-const Context = ()=>Model(...arguments)()
+const Context = (...args)=>Model(...args)()
 
 export { Model, Context, CTEX }
